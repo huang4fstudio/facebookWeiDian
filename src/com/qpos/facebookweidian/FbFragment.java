@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import com.facebook.*;
 import com.facebook.model.*;
-import com.facebook.widget.LoginButton;
+import com.facebook.widget.*;
 
 import android.support.v4.app.Fragment;
 // import android.util.Log;
@@ -36,6 +36,7 @@ public class FbFragment extends Fragment {
 	        onSessionStateChange(session, state, exception);
 	        loggedin = true;
 	    }
+
 	};
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,6 +122,7 @@ public class FbFragment extends Fragment {
 				     userId = user.getId();
 				    }
 				  }
+
 				}).executeAsync();
 			if(userId != null)
 			 ((MainActivity)getActivity()).authRegisteration(userId);
