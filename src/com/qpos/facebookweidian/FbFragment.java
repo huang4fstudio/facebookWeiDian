@@ -19,7 +19,6 @@ public class FbFragment extends Fragment {
 	
 	private String userId = null;
 	private boolean loggedin = false;
-	
 	// private static final String TAG = "FbFragment";
 	private UiLifecycleHelper uiHelper; // Facebook UiLifecycle Helper method that handles the Fragment's life cycle.
 	
@@ -38,6 +37,7 @@ public class FbFragment extends Fragment {
 	    }
 
 	};
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState){
@@ -45,24 +45,41 @@ public class FbFragment extends Fragment {
 		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
 		authButton.setReadPermissions(Arrays.asList("basic_info"));
 		authButton.setFragment(this);
+		authButton.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback(){
+
+		    @Override
+		    public void onUserInfoFetched(GraphUser user) {
+		      
+		        if (user != null) {
+		        	((MainActivity)getActivity()).authRegisteration(user.getId());
+		        }
+		    }
+		});
+
+		 Session session = Session.getActiveSession();
+		    if (session != null && session.isOpened()) {
+		        // Get the user's data
+		        parseUserID(session);
+		    }
+		    
 	    return view;
 	}
 
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-
+	   
 	    uiHelper = new UiLifecycleHelper(getActivity(), callback);
 	    uiHelper.onCreate(savedInstanceState);
 	}
-	
-	
 	
 	
 	@Override
 	public void onResume() {
 	    super.onResume();
 	    Session session = Session.getActiveSession();
+	    session.addCallback(callback);
 	    if (session != null &&
 	           (session.isOpened() || session.isClosed()) ) {
 	        onSessionStateChange(session, session.getState(), null);
@@ -74,12 +91,9 @@ public class FbFragment extends Fragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
-	    Session session = Session.getActiveSession();
-	    if (session != null &&
-	           (session.isOpened() || session.isClosed()) ) {
-	        onSessionStateChange(session, session.getState(), null);
-	    }
 	    uiHelper.onActivityResult(requestCode, resultCode, data);
+	  
+	    
 	}
 
 	@Override
@@ -111,28 +125,36 @@ public class FbFragment extends Fragment {
 	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
 		
 		
-		if (state.isOpened()) {
+		if (session != null && session.isOpened()) {
 			loggedin = true;
-			Request.newMeRequest(session, new Request.GraphUserCallback() {
-
-				  // callback after Graph API response with user object
-				  @Override
-				  public void onCompleted(GraphUser user, Response response) {
-				    if (user != null) {
-				     userId = user.getId();
-				    }
-				  }
-
-				}).executeAsync();
-			if(userId != null)
-			 ((MainActivity)getActivity()).authRegisteration(userId);
+			parseUserID(session);
 	        // Log.i(TAG, "Logged in...");
-	    } else if (state.isClosed()) {
+	    } else if (session != null && session.isClosed()) {
 	    	 loggedin = false;
 	    	 ((MainActivity)getActivity()).logout();
 	    	// Log.i(TAG, "Logged out...");
 	       
 	    }
+	}
+	
+	private void parseUserID(final Session session){
+		Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+
+			  // callback after Graph API response with user object
+			  @Override
+			  public void onCompleted(GraphUser user, Response response) {
+				  if (session == Session.getActiveSession()){
+				  if (user != null) {
+			     userId = user.getId();
+			    }
+				 
+			  }
+			  }
+
+			});
+			request.executeAsync();
+		if(userId != null)
+		 ((MainActivity)getActivity()).authRegisteration(userId);
 	}
 	
 	

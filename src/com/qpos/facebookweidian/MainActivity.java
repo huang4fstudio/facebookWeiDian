@@ -31,7 +31,7 @@ public class MainActivity extends FragmentActivity {
 	
 	private FbFragment loginFragment;
 	
-	
+	TextView mainText2;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -102,15 +102,16 @@ public class MainActivity extends FragmentActivity {
 	
 	public void logout(){
 		loggedin = false;
+		mainText2.setText("Logged...Out");
 		// logging out the WeiDian
 	}
 	
 	
 	private void setupWeiDianFragment(boolean registered, String userId){
-		TextView mainText2;
+		
 		mainText2 = (TextView) findViewById(R.id.mainTextView);
 	    if(loggedin == true){
-	    	if(registered && userId != null){
+	    	 if(registered && userId != null){
 			mainText2.setText(userId + "is Registered, Welcome!");// sets up the WeiDianFragment
 		}
 		
