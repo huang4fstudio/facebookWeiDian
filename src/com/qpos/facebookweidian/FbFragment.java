@@ -45,23 +45,7 @@ public class FbFragment extends Fragment {
 		LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
 		authButton.setReadPermissions(Arrays.asList("basic_info"));
 		authButton.setFragment(this);
-		authButton.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback(){
-
-		    @Override
-		    public void onUserInfoFetched(GraphUser user) {
-		      
-		        if (user != null) {
-		        	((MainActivity)getActivity()).authRegisteration(user.getId());
-		        }
-		    }
-		});
-
-		 Session session = Session.getActiveSession();
-		    if (session != null && session.isOpened()) {
-		        // Get the user's data
-		        parseUserID(session);
-		    }
-		    
+	
 	    return view;
 	}
 
@@ -125,9 +109,22 @@ public class FbFragment extends Fragment {
 	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
 		
 		
-		if (session != null && session.isOpened()) {
+		if (session != null && state.isOpened()) {
 			loggedin = true;
-			parseUserID(session);
+			Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+
+				  // callback after Graph API response with user object
+				  @Override
+				  public void onCompleted(GraphUser user, Response response) {
+					  if (user != null) {
+				     userId = user.getId();
+				     ((MainActivity)getActivity()).authRegisteration(userId);
+					  }  
+				  }
+
+				});
+				request.executeAsync();
+
 	        // Log.i(TAG, "Logged in...");
 	    } else if (session != null && session.isClosed()) {
 	    	 loggedin = false;
@@ -137,25 +134,7 @@ public class FbFragment extends Fragment {
 	    }
 	}
 	
-	private void parseUserID(final Session session){
-		Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
 
-			  // callback after Graph API response with user object
-			  @Override
-			  public void onCompleted(GraphUser user, Response response) {
-				  if (session == Session.getActiveSession()){
-				  if (user != null) {
-			     userId = user.getId();
-			    }
-				 
-			  }
-			  }
-
-			});
-			request.executeAsync();
-		if(userId != null)
-		 ((MainActivity)getActivity()).authRegisteration(userId);
-	}
 	
 	
 

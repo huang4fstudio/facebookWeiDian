@@ -102,7 +102,7 @@ public class MainActivity extends FragmentActivity {
 	
 	public void logout(){
 		loggedin = false;
-		mainText2.setText("Logged...Out");
+		//mainText2.setText("Logged...Out");
 		// logging out the WeiDian
 	}
 	
