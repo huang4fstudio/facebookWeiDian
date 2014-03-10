@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.widget.TextView;
 
 public class MainActivity extends FragmentActivity {
+	//test
 
 	private boolean loggedin;
 	
